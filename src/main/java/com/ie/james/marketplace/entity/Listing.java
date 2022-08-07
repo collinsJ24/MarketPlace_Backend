@@ -29,6 +29,16 @@ public class Listing {
     private Integer number;
     private boolean featured;
 
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    private String category;
+
     public Integer getPhone() {
         return phone;
     }

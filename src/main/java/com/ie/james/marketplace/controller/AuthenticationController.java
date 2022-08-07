@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -84,13 +85,9 @@ public class AuthenticationController {
     }
 
     @PostMapping("/signup/google")
-    public ResponseEntity<?> registerGoogleUser(@Valid @RequestBody GoogleSignUpRequest signUpRequest) {
+    public User registerGoogleUser(@Valid @RequestBody GoogleSignUpRequest signUpRequest) {
         if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Account already registerd for email"));
-        }
-
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+            return loginGoogleUser(signUpRequest);
         }
 
         // Create new user's account
@@ -99,7 +96,18 @@ public class AuthenticationController {
 
         userRepository.save(user);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        return user;
+    }
+
+    @PostMapping("/login/google")
+    public User loginGoogleUser(@Valid @RequestBody GoogleSignUpRequest signInRequest) {
+        User user = new User();
+        if (!userRepository.existsByEmail(signInRequest.getEmail())) {
+            user = registerGoogleUser(signInRequest);
+        }
+        user = userRepository.findByEmail(signInRequest.getEmail());
+
+        return user;
     }
 
     @PostMapping("/signout")
